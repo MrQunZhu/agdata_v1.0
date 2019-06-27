@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.clesun.dao.AgDataDao">
+
+    <!-- 获取单项统计 -->
+    <select id="getSingleStatisData" resultType="org.clesun.entity.SingleStatisEntity">
+        SELECT
+        (SELECT COUNT(DISTINCT farm_id) from d_farm) AS danweishuliang,
+        (SELECT sum(output_value) as output_value from (SELECT (IFNULL(total_yield,0)*IFNULL(product_price ,0)) as output_value from d_farm) t) AS chanyechanzhi,
+        (SELECT count(DISTINCT product_type) from d_product) AS zhongzhizhonglei,
+        (select sum(total_area) from d_farm) AS zhandimianji,
+        (select sum(IFNULL(plant_breed_area,0)) from d_farm where business_code=1) AS zhongzhimianji,
+        (SELECT count(DISTINCT product_name) from d_product where product_type=1) AS xumuzhonglei,
+        (SELECT SUM(IFNULL(breeding_stock,0)) from d_farm where business_code=4) AS yangzhishuliang,
+        (SELECT count(DISTINCT product_name) from d_product where product_type=2) AS shuichanzhonglei,
+        (SELECT sum(IFNULL(plant_breed_area,0)) from d_farm where business_code=2) AS shuichanmianji,
+        (SELECT COUNT(DISTINCT farm_id) from d_farm where business_code=5) AS jiagongqiye,
+        (SELECT COUNT(DISTINCT farm_id) from d_farm where business_code=1) AS zhongzhiqiye,
+        (SELECT COUNT(DISTINCT farm_id) from d_farm where business_code=4) AS xumuqiye,
+        (SELECT COUNT(DISTINCT farm_id) from d_farm where business_code=2) AS shuichanqiye
+    </select>
+
+    <!-- 产业种类统计 -->
+    <select id="getIndustryData" parameterType="string" resultType="org.clesun.entity.IndustryEntity">
+        SELECT
+        product.product_name as name,
+        product.total_yield as count,
+        product.product_parent_id,
+        product.product_parent_value,
+        farm.total_area,farm.plant_area
+        from
+        d_product product INNER JOIN d_farm farm on product.farm_id=farm.farm_id
+        <if test="city != null">
+            where
+            farm.farm_city= #{city,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <!-- 种植业统计、畜牧业统计、水产业统计 -->
+    <select id="getStatisData" parameterType="string" resultType="org.clesun.entity.StatisEntity">
+        SELECT
+        DATE_FORMAT(t.create_time,'%Y%m') mth,
+        CONCAT(YEAR(t.create_time),'_',QUARTER(t.create_time)) qu,
+        YEAR(t.create_time) year,
+        sum(total_yield) as total_yield,
+        avg(t.product_price) as product_price
+        from
+        (SELECT product_name,product_parent_id,
+        product_price,price_release_time as create_time,
+        total_yield
+        from
+        d_product product
+        where
+        product.product_parent_id=#{type}
+        <if test="city != null">
+            and city= #{city,jdbcType=VARCHAR}
+        </if>
+        <if test="productName != null">
+            and product_name= #{productName,jdbcType=VARCHAR}
+        </if>
+        ) t
+        <![CDATA[ WHERE t.create_time > SUBDATE(NOW(),INTERVAL 12 MONTH) ]]>
+        <![CDATA[ AND t.create_time < NOW() ]]>
+        <if test="time != null">
+            GROUP BY
+            <choose>
+                <when test="time == 'mth'">
+                    mth
+                </when>
+                <when test="time == 'qu'">
+                    qu
+                </when>
+                <when test="time == 'year'">
+                    year
+                </when>
+            </choose>
+        </if>
+    </select>
+
+    <!-- 获取城市列表 -->
+    <select id="getCitys" resultType="java.lang.String">
+        SELECT DISTINCT city  from d_product
+    </select>
+    <!-- 获取作物列表 -->
+    <select id="getProducts"  parameterType="int" resultType="java.lang.String">
+        SELECT DISTINCT product_name from d_product where product_parent_id=#{type}
+    </select>
+
+    <!-- 获取具体统计信息 -->
+    <select id="getProductsInfo"  parameterType="int" resultType="org.clesun.entity.ProductDetail">
+        SELECT
+           product_name,business_code as product_type,yield_unit,price_unit,total_yield
+        FROM
+          (SELECT IFNULL(breed_product_name,'未知') as product_name,'头/只' as yield_unit,'千克/元' as price_unit,business_code,SUM(IFNULL(breeding_stock,0)) as total_yield from d_farm GROUP BY breed_product_name) t
+        WHERE
+          business_code=#{type}
+    </select>
+
+
+    <!-- 获取种植，水产具体统计信息 -->
+    <select id="getProductsInfoFix"  parameterType="int" resultType="org.clesun.entity.ProductDetail">
+        SELECT
+        product_name,business_code as product_type,yield_unit,price_unit,total_yield
+        FROM
+        (SELECT IFNULL(product_name,'未知') as product_name,'亩' as yield_unit, price_unit ,business_code,SUM(IFNULL(total_yield,0)) as total_yield from d_farm GROUP BY product_name) t
+        WHERE
+        business_code=#{type}
+    </select>
+
+
+</mapper>

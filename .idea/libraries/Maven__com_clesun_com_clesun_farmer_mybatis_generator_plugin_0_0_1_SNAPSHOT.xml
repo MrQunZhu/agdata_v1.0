@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.clesun:com.clesun.farmer.mybatis.generator.plugin:0.0.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/clesun/com.clesun.farmer.mybatis.generator.plugin/0.0.1-SNAPSHOT/com.clesun.farmer.mybatis.generator.plugin-0.0.1-20170427.084900-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/clesun/com.clesun.farmer.mybatis.generator.plugin/0.0.1-SNAPSHOT/com.clesun.farmer.mybatis.generator.plugin-0.0.1-20170427.084900-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/clesun/com.clesun.farmer.mybatis.generator.plugin/0.0.1-SNAPSHOT/com.clesun.farmer.mybatis.generator.plugin-0.0.1-20170427.084900-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
