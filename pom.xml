@@ -342,7 +342,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.5</version>
+            <version>2.7</version>
         </dependency>
         <!--Excel表格处理工具类-->
         <dependency>
